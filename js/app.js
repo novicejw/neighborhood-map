@@ -2,7 +2,8 @@
 var locations = [
     {
         title: 'Park Ave Penthouse',
-        location: {lat: 40.7713024, lng: -73.9632393}
+        location: {lat: 40.7713024, lng: -73.9632393},
+        marker: null
     },
     {
         title: 'Chelsea Loft',
@@ -47,11 +48,14 @@ function initMap() {
         var title = locations[i].title;
         // Create a marker per location, and put into markers array.
         var marker = new google.maps.Marker({
+            map: map,
             position: position,
             title: title,
             animation: google.maps.Animation.DROP,
             id: i
         });
+        // store marker into locations
+        locations[i].marker = marker
         // Push the marker to our array of markers.
         markers.push(marker);
         // Create an onclick event to open an infowindow at each marker.
@@ -61,7 +65,37 @@ function initMap() {
     }
     document.getElementById('show-listings').addEventListener('click', showListings);
     document.getElementById('hide-listings').addEventListener('click', hideListings);
+}
+
+// View
+var Listing = function(data) {
+    this.title = ko.observable(data.title);
+    this.location = ko.observable(data.location);
+}
+
+// ViewModel
+var ViewModel = function() {
+    // use this in nested binding contexts to clearly refer to the right attribute
+    var self = this;
+
+    this.locationList = ko.observableArray([]);
+    locations.forEach(function(location){
+        self.locationList.push(new Listing(location));
+    });
+
+    this.setLocation = function(clickedListing) {
+        hideListings();
+        google.maps.event.trigger(clickedListing.marker, 'click');
+        clickedListing.marker.setMap(map);
     }
+
+}
+
+ko.applyBindings(new ViewModel());
+
+
+// Function definitions
+
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
 // on that markers position.
@@ -96,11 +130,3 @@ function hideListings() {
         markers[i].setMap(null);
     }
 }
-
-var ViewModel = function() {
-    // use this in nested binding contexts to clearly refer to the right attribute
-    var self = this;
-
-}
-
-ko.applyBindings(new ViewModel());
