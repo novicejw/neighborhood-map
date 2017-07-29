@@ -3,7 +3,6 @@ var locations = [
     {
         title: 'Park Ave Penthouse',
         location: {lat: 40.7713024, lng: -73.9632393},
-        marker: null
     },
     {
         title: 'Chelsea Loft',
@@ -54,7 +53,7 @@ function initMap() {
             animation: google.maps.Animation.DROP,
             id: i
         });
-        // store marker into locations
+        // store marker into locations array
         locations[i].marker = marker
         // Push the marker to our array of markers.
         markers.push(marker);
@@ -75,20 +74,30 @@ var Listing = function(data) {
 
 // ViewModel
 var ViewModel = function() {
-    // use this in nested binding contexts to clearly refer to the right attribute
+    // Since 'this' changes in every scope, 'self' will preserve 'this' value throughout viewModel.
     var self = this;
 
-    this.locationList = ko.observableArray([]);
-    locations.forEach(function(location){
-        self.locationList.push(new Listing(location));
-    });
+    this.listings = ko.observableArray(locations);
+//    this.locationList = ko.observableArray([]);
+//    locations.forEach(function(location){
+//        self.locationList.push(new Listing(location));
+//    });
 
+    // when user clicks on a listing, show the marker and infowindow associated with the listing
     this.setLocation = function(clickedListing) {
         hideListings();
         google.maps.event.trigger(clickedListing.marker, 'click');
         clickedListing.marker.setMap(map);
-    }
+    };
 
+    this.query = ko.observable('');
+
+    this.filterListings = ko.computed(function() {
+        var search = self.query().toLowerCase();
+        return ko.utils.arrayFilter(locations, function (listing) {
+            return listing.title.toLowerCase().indexOf(search) >= 0;
+        });
+    });
 }
 
 ko.applyBindings(new ViewModel());
