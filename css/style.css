@@ -22,11 +22,6 @@ h1 {
     text-align: center;
 }
 
-#hide-listings,
-#show-listings {
-    width: 48%;
-}
-
 #map {
     bottom:0px;
     height: 100%;
