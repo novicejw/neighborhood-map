@@ -26,11 +26,57 @@ var locations = [
     }
 ];
 
-
 // Create map
 var map;
 // Create a new blank array for all the listing markers.
 var markers = [];
+
+// View
+var Listing = function(data) {
+    this.title = ko.observable(data.title);
+    this.location = ko.observable(data.location);
+}
+
+// ViewModel
+var ViewModel = function() {
+    // Since 'this' changes in every scope, 'self' will preserve 'this' value throughout viewModel.
+    var self = this;
+
+    this.listings = ko.observableArray(locations);
+
+//    this.locationList = ko.observableArray([]);
+//    locations.forEach(function(location){
+//        self.locationList.push(new Listing(location));
+//    });
+
+    // when user clicks on a listing, show the marker and infowindow associated with the listing
+    this.setLocation = function(clickedListing) {
+        hideListings();
+        google.maps.event.trigger(clickedListing.marker, 'click');
+        clickedListing.marker.setVisible(true);
+    };
+
+    this.query = ko.observable('');
+
+    this.filterListings = ko.computed(function() {
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setVisible(true);
+        }
+        var search = self.query().toLowerCase();
+        return ko.utils.arrayFilter(locations, function(listing) {
+            if (listing.title.toLowerCase().indexOf(search) >= 0) {
+                return true;
+            }
+            listing.marker.setVisible(false);
+        });
+    });
+}
+
+ko.applyBindings(new ViewModel());
+
+
+// Function definitions
+
 function initMap() {
 // Constructor creates a new map - only center and zoom are required.
     map = new google.maps.Map(document.getElementById('map'), {
@@ -54,7 +100,7 @@ function initMap() {
             id: i
         });
         // store marker into locations array
-        locations[i].marker = marker
+        locations[i].marker = marker;
         // Push the marker to our array of markers.
         markers.push(marker);
         // Create an onclick event to open an infowindow at each marker.
@@ -62,48 +108,10 @@ function initMap() {
             populateInfoWindow(this, largeInfowindow);
         });
     }
+
     document.getElementById('show-listings').addEventListener('click', showListings);
     document.getElementById('hide-listings').addEventListener('click', hideListings);
 }
-
-// View
-var Listing = function(data) {
-    this.title = ko.observable(data.title);
-    this.location = ko.observable(data.location);
-}
-
-// ViewModel
-var ViewModel = function() {
-    // Since 'this' changes in every scope, 'self' will preserve 'this' value throughout viewModel.
-    var self = this;
-
-    this.listings = ko.observableArray(locations);
-//    this.locationList = ko.observableArray([]);
-//    locations.forEach(function(location){
-//        self.locationList.push(new Listing(location));
-//    });
-
-    // when user clicks on a listing, show the marker and infowindow associated with the listing
-    this.setLocation = function(clickedListing) {
-        hideListings();
-        google.maps.event.trigger(clickedListing.marker, 'click');
-        clickedListing.marker.setMap(map);
-    };
-
-    this.query = ko.observable('');
-
-    this.filterListings = ko.computed(function() {
-        var search = self.query().toLowerCase();
-        return ko.utils.arrayFilter(locations, function (listing) {
-            return listing.title.toLowerCase().indexOf(search) >= 0;
-        });
-    });
-}
-
-ko.applyBindings(new ViewModel());
-
-
-// Function definitions
 
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
@@ -127,7 +135,7 @@ function showListings() {
     var bounds = new google.maps.LatLngBounds();
     // Extend the boundaries of the map for each marker and display the marker
     for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(map);
+        markers[i].setVisible(true);
         bounds.extend(markers[i].position);
     }
     map.fitBounds(bounds);
@@ -136,6 +144,6 @@ function showListings() {
 // This function will loop through the listings and hide them all.
 function hideListings() {
     for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(null);
+        markers[i].setVisible(false);
     }
 }
