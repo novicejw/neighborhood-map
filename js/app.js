@@ -1,28 +1,54 @@
 // Model: Markers that will be shown to the user.
 var locations = [
     {
-        title: 'Park Ave Penthouse',
-        location: {lat: 40.7713024, lng: -73.9632393},
+        title: 'Metropolitan Museum of Art',
+        location: {lat: 40.779437, lng: -73.963244},
+        foursquareID: '427c0500f964a52097211fe3'
     },
     {
-        title: 'Chelsea Loft',
-        location: {lat: 40.7444883, lng: -73.9949465}
+        title: 'Museum of Modern Art',
+        location: {lat: 40.761433, lng: -73.977622},
+        foursquareID: '4af5a46af964a520b5fa21e3'
     },
     {
-        title: 'Union Square Open Floor Plan',
-        location: {lat: 40.7347062, lng: -73.9895759}
+        title: 'American Museum of Natural History',
+        location: {lat: 40.781324, lng: -73.973988},
+        foursquareID: '4297b480f964a52062241fe3'
     },
     {
-        title: 'East Village Hip Studio',
-        location: {lat: 40.7281777, lng: -73.984377}
+        title: 'Whitney Museum of American Art',
+        location: {lat: 40.739588, lng: -74.008863},
+        foursquareID: '421a7600f964a5209d1f1fe3'
     },
     {
-        title: 'TriBeCa Artsy Bachelor Pad',
-        location: {lat: 40.7195264, lng: -74.0089934}
+        title: 'The Frick Collection',
+        location: {lat: 40.770970, lng: -73.967384},
+        foursquareID: '49d6de35f964a520085d1fe3'
     },
     {
-        title: 'Chinatown Homey Space',
-        location: {lat: 40.7180628, lng: -73.9961237}
+        title: 'The Met Breuer',
+        location: {lat: 40.773420, lng: -73.963805},
+        foursquareID: '560697f6498e0ef447c5f6fd'
+    },
+    {
+        title: 'The Intrepid Sea, Air & Space Museum',
+        location: {lat: 40.764527, lng: -73.999608},
+        foursquareID: '49f5135cf964a5208e6b1fe3'
+    },
+    {
+        title: 'Solomon R Guggenheim Museum',
+        location: {lat: 40.782980, lng: -73.958971},
+        foursquareID: '41706480f964a520a51d1fe3'
+    },
+    {
+        title: 'Rubin Museum of Art',
+        location: {lat: 40.740177, lng: -73.997814},
+        foursquareID: '47b6cfccf964a520af4d1fe3'
+    },
+    {
+        title: 'The Morgan Library & Museum',
+        location: {lat: 40.749226, lng: -73.981397},
+        foursquareID: '49c54c1bf964a520ed561fe3'
     }
 ];
 
@@ -103,8 +129,10 @@ function initMap() {
         bounds.extend(marker.position);
         // Push the marker to our array of markers.
         markers.push(marker);
+
         // Create an onclick event to open an infowindow at each marker.
         marker.addListener('click', function() {
+            console.log(locations[i]);
             populateInfoWindow(this, largeInfowindow);
         });
     }
@@ -116,10 +144,39 @@ function initMap() {
 // one infowindow which will open at the marker that is clicked, and populate based
 // on that markers position.
 
+function foursquareAPI(location) {
+
+    // Construct Foursquare URL
+    var foursquareURL = "https://api.foursquare.com/v2/venues/";
+    console.log(location);
+    foursquareURL += location.foursquareID + '?' + $.param({
+      'client_id': 'RMNFGQ3TJCV2IV3OSKWL3NM3ZVMAPRVO1RIEJRSQXIE1MLKZ',
+      'client_secret': 'C5L5FCPPTQGJFKW4CJSIQXFK2MIYIPUJZ53RGEH0Y5CG2LJF',
+      'v': '20170730'
+    });
+
+    // Call API and construct HTML for infowindow
+    $.ajax({
+        dataType: "jsonp",
+        url: foursquareURL,
+        success: function(data) {
+            var innerHTML = '<div>';
+            if (data.response.venue.name) {
+                innerHTML += '<strong>' + data.response.venue.name + '</strong>';
+            }
+            innerHTML += '</div>';
+            console.log(innerHTML);
+//            infowindow.setContent(innerHTML);
+//            infowindow.open(map, marker);
+        }
+    })
+}
+
 function populateInfoWindow(marker, infowindow) {
 // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
         infowindow.marker = marker;
+
         infowindow.setContent('<div>' + marker.title + '</div>');
         infowindow.open(map, marker);
         // Make sure the marker property is cleared if the infowindow is closed.
