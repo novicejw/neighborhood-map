@@ -105,50 +105,56 @@ function initMap() {
         mapTypeControl: false
     });
 
-    var largeInfowindow = new google.maps.InfoWindow();
     var bounds = new google.maps.LatLngBounds();
 
     // The following group uses the location array to create an array of markers on initialize.
     for (var i = 0; i < locations.length; i++) {
+        createMarker(locations[i]);
+    }
+
+    function createMarker(location) {
         // Get the position from the location array.
-        var position = locations[i].location;
-        var title = locations[i].title;
+        var position = location.location;
+        var title = location.title;
         // Create a marker per location, and put into markers array.
         var marker = new google.maps.Marker({
             map: map,
             position: position,
             title: title,
             animation: google.maps.Animation.DROP,
-            id: i
+            //id: i
         });
         // store marker into locations array
-        locations[i].marker = marker;
+        location.marker = marker;
         // show marker
         marker.setVisible(true);
         // extend bounds of map to show marker
         bounds.extend(marker.position);
         // Push the marker to our array of markers.
         markers.push(marker);
-
+        // Create infowindow - only one open at each time
+        var infowindow = new google.maps.InfoWindow();
         // Create an onclick event to open an infowindow at each marker.
         marker.addListener('click', function() {
-            console.log(locations[i]);
-            populateInfoWindow(this, largeInfowindow);
+            foursquareAPI(location, infowindow);
+//            populateInfoWindow(this, largeInfowindow);
         });
+
     }
 
     map.fitBounds(bounds);
+
 }
+
 
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
 // on that markers position.
 
-function foursquareAPI(location) {
+function foursquareAPI(location, infowindow) {
 
     // Construct Foursquare URL
     var foursquareURL = "https://api.foursquare.com/v2/venues/";
-    console.log(location);
     foursquareURL += location.foursquareID + '?' + $.param({
       'client_id': 'RMNFGQ3TJCV2IV3OSKWL3NM3ZVMAPRVO1RIEJRSQXIE1MLKZ',
       'client_secret': 'C5L5FCPPTQGJFKW4CJSIQXFK2MIYIPUJZ53RGEH0Y5CG2LJF',
@@ -163,11 +169,21 @@ function foursquareAPI(location) {
             var innerHTML = '<div>';
             if (data.response.venue.name) {
                 innerHTML += '<strong>' + data.response.venue.name + '</strong>';
+                innerHTML += '<br>';
+                innerHTML += '<p>' + data.response.venue.contact.phone + '</p>';
+                innerHTML += '<br>';
+                innerHTML += '<p>' + data.response.venue.stats.checkinsCount + '</p>';
             }
             innerHTML += '</div>';
-            console.log(innerHTML);
-//            infowindow.setContent(innerHTML);
-//            infowindow.open(map, marker);
+
+            // Set the marker property on this infowindow so it isn't created again.
+            infowindow.marker = location.marker;
+            infowindow.setContent(innerHTML);
+            infowindow.open(map, location.marker);
+            // Make sure the marker property is cleared if the infowindow is closed.
+            infowindow.addListener('closeclick', function() {
+                infowindow.marker = null;
+            });
         }
     })
 }
