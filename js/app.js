@@ -49,9 +49,20 @@ var locations = [
         title: 'The Morgan Library & Museum',
         location: {lat: 40.749226, lng: -73.981397},
         foursquareID: '49c54c1bf964a520ed561fe3'
+    },
+    {
+        title: 'National Museum of the American Indian',
+        location: {lat: 40.704018, lng: -74.013723},
+        foursquareID: '45719c4bf964a520693e1fe3'
+    },
+    {
+        title: 'Tenement Museum',
+        location: {lat: 40.718796, lng: -73.990070},
+        foursquareID: '4ab2c893f964a520566c20e3'
     }
 ];
 
+// Declare global variables
 // Create map
 var map;
 // Create a new blank array for all the listing markers.
@@ -147,7 +158,6 @@ function initMap() {
     }
 
     map.fitBounds(bounds);
-
 }
 
 
@@ -171,10 +181,20 @@ function foursquareAPI(location, infowindow) {
         url: foursquareURL,
         success: function(data) {
             var innerHTML = '<div>';
-            if (data.response.venue.name) {
-                innerHTML += '<strong>' + data.response.venue.name + '</strong>';
-                innerHTML += '<p>' + data.response.venue.contact.phone + '</p>';
-                innerHTML += '<p>' + data.response.venue.stats.checkinsCount + '</p>';
+            // store main results into variable to allow easier retrieval later
+            var result = data.response.venue
+            if (result.name) {
+                innerHTML += '<strong>' + result.name + '</strong>';
+                innerHTML += '<p><a href=\"' + result.url + '\">'+
+                    result.url + '</a></p>';
+                if (result.description) {
+                    innerHTML += '<p>' + result.description + '</p>';
+                }
+                innerHTML += '<p>' +
+                    result.stats.checkinsCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                    ' Foursquare check-ins</p>';
+                innerHTML += '<p><img src=\"' + result.bestPhoto.prefix + '100x100' +
+                    result.bestPhoto.suffix + '\"></p>';
             }
             innerHTML += '</div>';
 
@@ -188,18 +208,4 @@ function foursquareAPI(location, infowindow) {
             });
         }
     })
-}
-
-function populateInfoWindow(marker, infowindow) {
-// Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
-        infowindow.marker = marker;
-
-        infowindow.setContent('<div>' + marker.title + '</div>');
-        infowindow.open(map, marker);
-        // Make sure the marker property is cleared if the infowindow is closed.
-        infowindow.addListener('closeclick', function() {
-            infowindow.marker = null;
-        });
-    }
 }
