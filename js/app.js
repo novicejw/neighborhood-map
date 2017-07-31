@@ -136,7 +136,6 @@ function initMap() {
             position: position,
             title: title,
             animation: google.maps.Animation.DROP,
-            //id: i
         });
         // store marker into locations array
         location.marker = marker;
@@ -152,6 +151,7 @@ function initMap() {
                 window.alert("This marker is already selected!");
             } else {
                 foursquareAPI(location, infowindow);
+                toggleBounce(marker);
             }
         });
 
@@ -180,32 +180,48 @@ function foursquareAPI(location, infowindow) {
         dataType: "jsonp",
         url: foursquareURL,
         success: function(data) {
-            var innerHTML = '<div>';
-            // store main results into variable to allow easier retrieval later
-            var result = data.response.venue
-            if (result.name) {
-                innerHTML += '<strong>' + result.name + '</strong>';
-                innerHTML += '<p><a href=\"' + result.url + '\">'+
-                    result.url + '</a></p>';
-                if (result.description) {
-                    innerHTML += '<p>' + result.description + '</p>';
+            if (data.meta.code == '200') {
+                var innerHTML = '<div>';
+                // store main results into variable to allow easier retrieval later
+                var result = data.response.venue
+                if (result.name) {
+                    innerHTML += '<strong>' + result.name + '</strong>';
+                    innerHTML += '<p><a href=\"' + result.url + '\">'+
+                        result.url + '</a></p>';
+                    if (result.description) {
+                        innerHTML += '<p>' + result.description + '</p>';
+                    }
+                    innerHTML += '<p>' +
+                        result.stats.checkinsCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                        ' Foursquare check-ins</p>';
+                    innerHTML += '<p><img src=\"' + result.bestPhoto.prefix + '100x100' +
+                        result.bestPhoto.suffix + '\"></p>';
                 }
-                innerHTML += '<p>' +
-                    result.stats.checkinsCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-                    ' Foursquare check-ins</p>';
-                innerHTML += '<p><img src=\"' + result.bestPhoto.prefix + '100x100' +
-                    result.bestPhoto.suffix + '\"></p>';
-            }
-            innerHTML += '</div>';
+                innerHTML += '</div>';
 
-            // Set the marker property on this infowindow so it isn't created again.
-            infowindow.marker = location.marker;
-            infowindow.setContent(innerHTML);
-            infowindow.open(map, location.marker);
-            // Make sure the marker property is cleared if the infowindow is closed.
-            infowindow.addListener('closeclick', function() {
-                infowindow.marker = null;
-            });
+                // Set the marker property on this infowindow so it isn't created again.
+                infowindow.marker = location.marker;
+                infowindow.setContent(innerHTML);
+                infowindow.open(map, location.marker);
+                // Make sure the marker property is cleared if the infowindow is closed.
+                infowindow.addListener('closeclick', function() {
+                    infowindow.marker = null;
+                });
+            } else {
+                alert("Unable to retrieve information for this location");
+            }
         }
     })
+}
+
+function toggleBounce(marker) {
+    if (marker.getAnimation() !== null) {
+        marker.setAnimation(null);
+    } else {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        // set timeout function so marker stops bouncing after a while
+        setTimeout(function() {
+            marker.setAnimation(null);
+        }, 800);
+    }
 }
