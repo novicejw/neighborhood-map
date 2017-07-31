@@ -107,6 +107,9 @@ function initMap() {
 
     var bounds = new google.maps.LatLngBounds();
 
+    // Create infowindow outside of the for loop below, so only one open at each time
+    var infowindow = new google.maps.InfoWindow();
+
     // The following group uses the location array to create an array of markers on initialize.
     for (var i = 0; i < locations.length; i++) {
         createMarker(locations[i]);
@@ -132,12 +135,13 @@ function initMap() {
         bounds.extend(marker.position);
         // Push the marker to our array of markers.
         markers.push(marker);
-        // Create infowindow - only one open at each time
-        var infowindow = new google.maps.InfoWindow();
         // Create an onclick event to open an infowindow at each marker.
         marker.addListener('click', function() {
-            foursquareAPI(location, infowindow);
-//            populateInfoWindow(this, largeInfowindow);
+            if (infowindow.marker == this) {
+                window.alert("This marker is already selected!");
+            } else {
+                foursquareAPI(location, infowindow);
+            }
         });
 
     }
@@ -169,9 +173,7 @@ function foursquareAPI(location, infowindow) {
             var innerHTML = '<div>';
             if (data.response.venue.name) {
                 innerHTML += '<strong>' + data.response.venue.name + '</strong>';
-                innerHTML += '<br>';
                 innerHTML += '<p>' + data.response.venue.contact.phone + '</p>';
-                innerHTML += '<br>';
                 innerHTML += '<p>' + data.response.venue.stats.checkinsCount + '</p>';
             }
             innerHTML += '</div>';
