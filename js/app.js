@@ -181,23 +181,30 @@ function foursquareAPI(location, infowindow) {
         url: foursquareURL,
         success: function(data) {
             if (data.meta.code == '200') {
-                var innerHTML = '<div>';
+                var innerHTML = '<div id="iw-container">';
                 // store main results into variable to allow easier retrieval later
                 var result = data.response.venue
                 if (result.name) {
-                    innerHTML += '<strong>' + result.name + '</strong>';
-                    innerHTML += '<p><a href=\"' + result.url + '\">'+
-                        result.url + '</a></p>';
+                    innerHTML += '<p class="iw-title">' + result.name + '</p>';
+                    innerHTML += '<div class="iw-content">'
+                    if (result.url) {
+                        innerHTML += '<p><a href="' + result.url +
+                            '">'+ result.url + '</a></p>';
+                    }
+                    if (result.bestPhoto) {
+                        innerHTML += '<p><img src="' + result.bestPhoto.prefix + '100x100' +
+                            result.bestPhoto.suffix + '"></p>';
+                    }
                     if (result.description) {
                         innerHTML += '<p>' + result.description + '</p>';
                     }
-                    innerHTML += '<p>' +
-                        result.stats.checkinsCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-                        ' Foursquare check-ins</p>';
-                    innerHTML += '<p><img src=\"' + result.bestPhoto.prefix + '100x100' +
-                        result.bestPhoto.suffix + '\"></p>';
+                    if (result.stats.checkinsCount) {
+                        innerHTML += '<p><strong>' +
+                            result.stats.checkinsCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                            '<strong> Foursquare check-ins</p>';
+                    }
                 }
-                innerHTML += '</div>';
+                innerHTML += '</div></div>';
 
                 // Set the marker property on this infowindow so it isn't created again.
                 infowindow.marker = location.marker;
