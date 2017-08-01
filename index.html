@@ -9,11 +9,22 @@
     <body>
         <div class="container">
             <div class="options-box">
-                <h1>Find Museums in NYC</h1>
-                <input placeholder="Search museum name" type="search" data-bind="textInput: query">
-                <div>
-                    <ul data-bind="foreach: filterListings()">
+                <div id="menuToggle">
+                    <!-- A fake / hidden checkbox is used as click reciever,
+                    so you can use the :checked selector on it. -->
+                    <input id="ham" type="checkbox" />
+
+                    <!-- Some spans to act as a hamburger. -->
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                    <ul id="menu">
+                        <h1>Find Museums in NYC</h1>
+                        <input id="search" placeholder="Search museum name" type="search" data-bind="textInput: query">
+                        <ul id="location-list" data-bind="foreach: filterListings()">
                             <li data-bind="text: title, click: $parent.setLocation"></li>
+                        </ul>
                     </ul>
                 </div>
             </div>
