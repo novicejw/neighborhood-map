@@ -76,17 +76,20 @@ var Listing = function(data) {
 
 // ViewModel
 var ViewModel = function() {
-    // Since 'this' changes in every scope, 'self' will preserve 'this' value throughout viewModel.
+    // Since 'this' changes in every scope, 'self' will preserve
+    // 'this' value throughout viewModel.
     var self = this;
 
     this.listings = ko.observableArray(locations);
 
-    // when user clicks on a listing, show the marker and infowindow associated with the listing
+    // when user clicks on a listing, show the marker and infowindow
+    // associated with the listing
     this.setLocation = function(clickedListing) {
         google.maps.event.trigger(clickedListing.marker, 'click');
         clickedListing.marker.setVisible(true);
     };
 
+    // implement filter function
     this.query = ko.observable('');
 
     this.filterListings = ko.computed(function() {
@@ -95,6 +98,7 @@ var ViewModel = function() {
         }
         var search = self.query().toLowerCase();
         return ko.utils.arrayFilter(locations, function(listing) {
+            // show markers with titles that match filter text
             if (listing.title.toLowerCase().indexOf(search) >= 0) {
                 return true;
             }
@@ -121,7 +125,7 @@ function initMap() {
     // Create infowindow outside of the for loop below, so only one open at each time
     var infowindow = new google.maps.InfoWindow();
 
-    // The following group uses the location array to create an array of markers on initialize.
+    // Create an array of markers on initialize.
     for (var i = 0; i < locations.length; i++) {
         createMarker(locations[i]);
     }
@@ -217,10 +221,15 @@ function foursquareAPI(location, infowindow) {
             } else {
                 alert("Unable to retrieve information for this location");
             }
+        },
+        error: function() {
+            // alert user if ajax request failed
+            alert("Unable to retrieve information from Foursquare");
         }
     })
 }
 
+// bounce marker when marker is selected
 function toggleBounce(marker) {
     if (marker.getAnimation() !== null) {
         marker.setAnimation(null);
