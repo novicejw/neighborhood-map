@@ -72,7 +72,7 @@ var markers = [];
 var Listing = function(data) {
     this.title = ko.observable(data.title);
     this.location = ko.observable(data.location);
-}
+};
 
 // ViewModel
 var ViewModel = function() {
@@ -105,7 +105,7 @@ var ViewModel = function() {
             listing.marker.setVisible(false);
         });
     });
-}
+};
 
 ko.applyBindings(new ViewModel());
 
@@ -187,10 +187,10 @@ function foursquareAPI(location, infowindow) {
             if (data.meta.code == '200') {
                 var innerHTML = '<div id="iw-container">';
                 // store main results into variable to allow easier retrieval later
-                var result = data.response.venue
+                var result = data.response.venue;
                 if (result.name) {
                     innerHTML += '<p class="iw-title">' + result.name + '</p>';
-                    innerHTML += '<div class="iw-content">'
+                    innerHTML += '<div class="iw-content">';
                     if (result.url) {
                         innerHTML += '<p><a href="' + result.url +
                             '">'+ result.url + '</a></p>';
@@ -226,7 +226,7 @@ function foursquareAPI(location, infowindow) {
             // alert user if ajax request failed
             alert("Unable to retrieve information from Foursquare");
         }
-    })
+    });
 }
 
 // bounce marker when marker is selected
