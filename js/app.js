@@ -70,8 +70,12 @@ var markers = [];
 
 // View
 var Listing = function(data) {
-    this.title = ko.observable(data.title);
-    this.location = ko.observable(data.location);
+    // Didn't use an observable for these items since data is static.
+    // Only use observables if variable changes dynamically and view needs to be updated.
+    // Observables create additional watch cycles in the browser.
+    // Too many unnecessary observables can affect performance.
+    this.title = data.title;
+    this.location = data.location;
 };
 
 // ViewModel
@@ -164,6 +168,10 @@ function initMap() {
     map.fitBounds(bounds);
 }
 
+// if unable to connect to Google Maps API
+function googleError() {
+    alert('Unable to connect to Google Maps');
+}
 
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
@@ -181,7 +189,7 @@ function foursquareAPI(location, infowindow) {
 
     // Call API and construct HTML for infowindow
     $.ajax({
-        dataType: "jsonp",
+        dataType: "json",
         url: foursquareURL,
         success: function(data) {
             if (data.meta.code == '200') {
